@@ -1,0 +1,457 @@
+<ion-content [fullscreen]="true">
+  <div class="headtext">
+    <h1>Gestion del condominio:</h1>
+    <p>
+      Bienvenido a la página de gestión del condominio. Aquí puedes agregar
+      nuevos empleados, nuevos residentes y también nuevo auto para un
+      residente.
+    </p>
+  </div>
+  <ion-segment (ionChange)="segmentChanged($event)">
+    <ion-segment-button value="empleados" checked>
+      Empleados
+    </ion-segment-button>
+    <ion-segment-button value="personas"> Residentes </ion-segment-button>
+    <ion-segment-button value="vehiculos"> Vehículos </ion-segment-button>
+  </ion-segment>
+
+  <ng-container *ngIf="selectedSegment === 'empleados'">
+    <!-- Formulario para ingresar empleado -->
+    <ion-card>
+      <ion-card-content>
+        <ion-item>
+          <ion-label>RUT</ion-label>
+          <ion-input
+            placeholder="Ej: 12345678-9"
+            type="text"
+            [(ngModel)]="rutF"
+            (ionChange)="validarRutDV(rutF)"
+            #rutInput
+            required
+          ></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label>NOMBRES:</ion-label>
+          <ion-input
+            placeholder="Primer nombre"
+            [(ngModel)]="empleado.primerNombre"
+            required
+          ></ion-input>
+          <ion-input
+            placeholder="Segundo nombre (opcional)"
+            [(ngModel)]="empleado.segundoNombre"
+          ></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label>APELLIDOS:</ion-label>
+          <ion-input
+            placeholder="Primer apellido"
+            [(ngModel)]="empleado.primerApellido"
+            required
+          ></ion-input>
+          <ion-input
+            placeholder="Segundo apellido (opcional)"
+            [(ngModel)]="empleado.segundoApellido"
+          ></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label>CORREO:</ion-label>
+          <ion-input
+            placeholder="Ingrese correo. Ej: aaa@aaa.cl"
+            [(ngModel)]="empleado.correo"
+            required
+          ></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label>DIRECCIÓN:</ion-label>
+          <ion-input
+            placeholder="Ingrese dirección. Ej: Combarbalá 652"
+            [(ngModel)]="empleado.direccion"
+            required
+          ></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label>REGIÓN:</ion-label>
+          <ion-select
+            [(ngModel)]="empleado.region"
+            required
+            (ionChange)="buscarComunasPorRegion(empleado.region)"
+          >
+            <ion-select-option
+              *ngFor="let region of regiones"
+              [value]="region.id_region"
+            >
+              {{ region.nombre_region }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item>
+          <ion-label>COMUNA:</ion-label>
+          <ion-select [(ngModel)]="empleado.comuna" name="comuna" required>
+            <ion-select-option
+              *ngFor="let comuna of comunas"
+              [value]="comuna.id_comuna"
+            >
+              {{ comuna.nombre_comuna }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item>
+          <ion-label>CONDOMINIO:</ion-label>
+          <ion-select [(ngModel)]="empleado.condominioEmpleado" required>
+            <ion-select-option
+              *ngFor="let condominio of condominios"
+              [value]="condominio.id_conjunto"
+            >
+              {{ condominio.nombre_conjunto }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item>
+          <ion-label>CARGO EMPLEADO:</ion-label>
+          <ion-select [(ngModel)]="empleado.cargoEmpleado" required>
+            <ion-select-option
+              *ngFor="let cargo of cargos"
+              [value]="cargo.id_cargo"
+              >{{ cargo.cargo }}</ion-select-option
+            >
+          </ion-select>
+        </ion-item>
+
+        <ion-button expand="full" (click)="guardarEmpleado()"
+          >Guardar</ion-button
+        >
+      </ion-card-content>
+    </ion-card>
+  </ng-container>
+
+  <ng-container *ngIf="selectedSegment === 'personas'">
+    <!-- Formulario para ingresar personas -->
+    <ion-card>
+      <ion-card-content>
+        <ion-item>
+          <ion-label>RUT</ion-label>
+          <ion-input
+            placeholder="Ej: 12345678-9"
+            type="text"
+            [(ngModel)]="rutF"
+            (ionChange)="validarRutDV(rutF)"
+            #rutInput
+            required
+          ></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label>NOMBRES:</ion-label>
+          <ion-input
+            placeholder="Primer nombre"
+            [(ngModel)]="persona.primerNombre"
+            required
+          ></ion-input>
+          <ion-input
+            placeholder="Segundo nombre (opcional)"
+            [(ngModel)]="persona.segundoNombre"
+          ></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label>APELLIDOS:</ion-label>
+          <ion-input
+            placeholder="Primer apellido"
+            [(ngModel)]="persona.primerApellido"
+            required
+          ></ion-input>
+          <ion-input
+            placeholder="Segundo apellido (opcional)"
+            [(ngModel)]="persona.segundoApellido"
+          ></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label>CORREO:</ion-label>
+          <ion-input
+            placeholder="Ingrese correo. Ej: aaa@aaa.cl"
+            [(ngModel)]="persona.correo"
+            required
+          ></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label>TIPO:</ion-label>
+          <ion-select [(ngModel)]="persona.tipo_persona" required>
+            <ion-select-option value="propietario"
+              >Propietario</ion-select-option
+            >
+            <ion-select-option value="arrendatario"
+              >Arrendatario</ion-select-option
+            >
+          </ion-select>
+        </ion-item>
+        <ion-item>
+          <ion-label>CONDOMINIO:</ion-label>
+          <ion-select
+            [(ngModel)]="persona.condominioPersona"
+            required
+            (ionChange)="filtrarEdificios()"
+          >
+            <ion-select-option
+              *ngFor="let condominio of condominios"
+              [value]="condominio.id_conjunto"
+            >
+              {{ condominio.nombre_conjunto }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+        <ion-item>
+          <ion-label>TORRE:</ion-label>
+          <ion-select
+            [(ngModel)]="persona.edificioPersona"
+            required
+            (ionChange)="filtrarDepartamentos()"
+          >
+            <ion-select-option
+              *ngFor="let edificio of edificiosFiltrados"
+              [value]="edificio.id_edificio"
+            >
+              {{ edificio.id_edificio }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+        <ion-item>
+          <ion-label>DEPTO:</ion-label>
+          <ion-select [(ngModel)]="persona.departamentoPersona" required>
+            <ion-select-option
+              *ngFor="let departamento of departamentosFiltrados"
+              [value]="departamento.id_departamento"
+            >
+              {{ departamento.id_departamento }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-button expand="full" (click)="guardarResidente()"
+          >Guardar</ion-button
+        >
+      </ion-card-content>
+    </ion-card>
+  </ng-container>
+
+  <ng-container *ngIf="selectedSegment === 'vehiculos'">
+    <!-- Formulario para ingresar vehículos -->
+    <ion-card>
+      <ion-card-content>
+        <ion-item>
+          <ion-label>PATENTE:</ion-label>
+          <input
+            type="text"
+            [(ngModel)]="patente"
+            placeholder="Ingrese la patente del vehículo"
+          />
+        </ion-item>
+        <ion-button expand="full" (click)="buscar()"> Buscar </ion-button>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- <ion-content>
+      <ion-item>
+        <ion-label position="floating">Patente</ion-label>
+        <ion-input [(ngModel)]="patente" type="text"></ion-input>
+      </ion-item>
+
+      <ion-button expand="full" (click)="buscar()">Buscar</ion-button>
+
+      <ion-card *ngIf="vehiculo">
+        <ion-card-header> Información del Vehículo </ion-card-header>
+        <ion-card-content>
+          <ion-list>
+            <ion-item>
+              <ion-label>Patente:</ion-label>
+              <ion-text>{{ vehiculo.patente }}</ion-text>
+            </ion-item>
+            <ion-item>
+              <ion-label>Tipo de Vehículo:</ion-label>
+              <ion-text>{{ vehiculo.tipo_veh }}</ion-text>
+            </ion-item>
+             Agrega aquí más elementos según los datos del vehículo que quieras mostrar 
+          </ion-list>
+        </ion-card-content>
+      </ion-card>
+    </ion-content> -->
+
+    <!-- Formulario para editar vehículos  -->
+    <ion-card>
+      <ion-card-content>
+        <ion-item>
+          <ion-label>PATENTE:</ion-label>
+          <ion-input [(ngModel)]="vehiculo.patente" readonly></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label>TIPO:</ion-label>
+          <ion-input [(ngModel)]="vehiculo.tipo_veh" readonly></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label>COLOR:</ion-label>
+          <ion-select
+            [(ngModel)]="colorSeleccionado"
+            (ionChange)="seleccionarColor($event)"
+          >
+            <ion-select-option
+              *ngFor="let color of colores"
+              [value]="color.id_colorveh"
+            >
+              {{ color.color_veh }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+        <ion-item>
+          <ion-label>ESTADO:</ion-label>
+          <ion-select [(ngModel)]="estadoSeleccionado">
+            <ion-select-option value="1">Activo</ion-select-option>
+            <ion-select-option value="0">Inactivo</ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item>
+          <ion-label>RESIDENTE:</ion-label>
+          <ion-input readonly>
+            {{vehiculo.primer_nombre + ' ' +
+            vehiculo.primer_apellido}}</ion-input
+          >
+        </ion-item>
+
+        <ion-item>
+          <ion-label>DEPTO:</ion-label>
+          <ion-input
+            [(ngModel)]="vehiculo.id_departamento"
+            readonly
+          ></ion-input>
+        </ion-item>
+        <ion-button expand="full" (click)="agregarVehiculo()">
+          Actualizar
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Formulario para agregar vehículos -->
+    <ion-card>
+      <ion-card-content>
+        <ion-item>
+          <ion-label>PATENTE:</ion-label>
+          <ion-input readonly>{{ vehiculo.patente }}</ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label>TIPO VEHICULO:</ion-label>
+          <ion-select [(ngModel)]="vehiculo.tipo_veh">
+            <ion-select-option value="Sedán">Sedán</ion-select-option>
+          </ion-select>
+        </ion-item>
+        <ion-item>
+          <ion-label>COLOR:</ion-label>
+          <ion-select
+            [(ngModel)]="colorSeleccionado"
+            (ionChange)="seleccionarColor($event)"
+          >
+            <ion-select-option
+              *ngFor="let color of colores"
+              [value]="color.id_colorveh"
+            >
+              {{ color.color_veh }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+        <ion-item>
+          <ion-label>CONDOMINIO:</ion-label>
+          <ion-select
+            [(ngModel)]="vehiculo.id_conjunto"
+            required
+            (ionChange)="filtrarEdificios()"
+          >
+            <ion-select-option
+              *ngFor="let condominio of condominios"
+              [value]="condominio.id_conjunto"
+            >
+              {{ condominio.nombre_conjunto }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item>
+          <ion-label>TORRE:</ion-label>
+          <ion-select
+            [(ngModel)]="vehiculo.id_edificio"
+            required
+            (ionChange)="filtrarDepartamentos()"
+          >
+            <ion-select-option
+              *ngFor="let edificio of edificiosFiltrados"
+              [value]="edificio.id_edificio"
+            >
+              {{ edificio.id_edificio }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item>
+          <ion-label>DEPTO:</ion-label>
+          <ion-select [(ngModel)]="vehiculo.id_departamento" required>
+            <ion-select-option
+              *ngFor="let departamento of departamentosFiltrados"
+              [value]="departamento.id_departamento"
+            >
+              {{ departamento.id_departamento }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item>
+          <ion-label>ESTACIONAMIENTO:</ion-label>
+          <ion-select [(ngModel)]="vehiculo.estacionamiento">
+            <ion-select-option value="101">101</ion-select-option>
+          </ion-select>
+        </ion-item>
+        <ion-button expand="full" (click)="agregarVehiculo()"
+          >Agregar</ion-button
+        >
+      </ion-card-content>
+    </ion-card>
+
+    <!--  Sección para mostrar información del vehículo -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Información del vehículo</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list>
+          <ion-item>
+            <ion-label>PATENTE:</ion-label>
+            <ion-input readonly [value]="vehiculo.patente"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label>TIPO VEHICULO:</ion-label>
+            <ion-input readonly [value]="vehiculo.tipoVehiculo"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label>COLOR:</ion-label>
+            <ion-input readonly [value]="vehiculo.color"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label>CONDOMINIO:</ion-label>
+            <ion-input readonly [value]="vehiculo.condominio"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label>TORRE:</ion-label>
+            <ion-input readonly [value]="vehiculo.torre"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label>DEPTO:</ion-label>
+            <ion-input readonly [value]="vehiculo.depto"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label>ESTACIONAMIENTO:</ion-label>
+            <ion-input readonly [value]="vehiculo.estacionamiento"></ion-input>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+  </ng-container>
+</ion-content>

@@ -1,0 +1,60 @@
+<ion-content>
+  <div class="headtext">
+    <h1>Administración de Empleados:</h1>
+    <p>
+      Bienvenido a la página de administración de Empleados de condominio. Aquí
+      puedes gestionar los detalles de los empleados registrados.
+    </p>
+  </div>
+  <ion-list>
+    <!-- Agrega un input y un botón para filtrar -->
+    <ion-item>
+      <h3>Tabla de Empleados:</h3>
+      <ion-input
+        class="casillafiltro"
+        placeholder="Ingrese texto de filtro"
+      ></ion-input>
+      <ion-button>Filtrar</ion-button>
+    </ion-item>
+    <ion-item>
+      <ion-row class="encabezado">
+        <ion-col class="column-width"><strong>RUT</strong></ion-col>
+        <ion-col class="column-width"><strong>NOMBRE(S)</strong></ion-col>
+        <ion-col class="column-width"><strong>APELLIDO(S)</strong></ion-col>
+        <ion-col class="column-width"><strong>CORREO</strong></ion-col>
+        <ion-col class="column-width"><strong>ESTADO</strong></ion-col>
+        <ion-col class="column-width"><strong>CARGO</strong></ion-col>
+        <ion-col class="column-width"><strong>DIRECCIÓN</strong></ion-col>
+        <ion-col class="column-width"><strong>COMUNA</strong></ion-col>
+        <ion-col class="column-width"><strong>REGIÓN</strong></ion-col>
+        <ion-col class="column-width"><strong>ACCIÓN</strong></ion-col>
+      </ion-row>
+    </ion-item>
+
+    <ion-item *ngFor="let empleado of empleados">
+      <ion-row>
+        <ion-col class="column-width"
+          >{{ empleado.rut + '-' + empleado.dv}}</ion-col
+        >
+        <ion-col class="column-width"
+          >{{ empleado.primer_nombre + ' ' + empleado.segundo_nombre }}</ion-col
+        >
+        <ion-col class="column-width"
+          >{{ empleado.primer_apellido + ' ' + empleado.segundo_apellido
+          }}</ion-col
+        >
+        <ion-col class="column-width">{{ empleado.mail }}</ion-col>
+        <ion-col class="column-width">{{ empleado.estatus }}</ion-col>
+        <ion-col class="column-width">{{ empleado.cargo }}</ion-col>
+        <ion-col class="column-width">{{ empleado.direccion }}</ion-col>
+        <ion-col class="column-width">{{ empleado.nombre_comuna }}</ion-col>
+        <ion-col class="column-width">{{ empleado.nombre_region }}</ion-col>
+        <ion-col class="column-width">
+          <ion-button (click)="abrirModalEditarEmpleado(empleado)"
+            >Editar</ion-button
+          >
+        </ion-col>
+      </ion-row>
+    </ion-item>
+  </ion-list>
+</ion-content>
