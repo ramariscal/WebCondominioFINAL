@@ -88,20 +88,14 @@ export class ApiService {
 
     // Realiza una solicitud POST para guardar el vehículo en la base de datos
     return this.http.post(url, vehiculo);
-  }
-      // Método para actualizar un vehículo en la API
-  actualizarVehiculo(patente: string, datos: any): Observable<any> {
-    const url = `http://localhost:3000/vehiculos/${patente}`;
-    return this.http.put<any>(url, datos);
-  }
-  
+  }  
       obtenerDatosVehiculo(patente: string): Observable<any> {
     const url = `${this.apiUrl}/buscarVehiculo?patente=${patente}`;
     return this.http.get<any>(url);
   }
 
   obtenerColoresVehiculo(): Observable<any[]> {
-    const url = '/obtenerColorVeh';
+    const url = `${this.apiUrl}/obtenerColorVeh`;
     return this.http.get<any[]>(url);
   }
   
@@ -109,6 +103,33 @@ export class ApiService {
     const url = '/obtenerEstadosVeh';
     return this.http.get<any[]>(url);
   }
+  
+  actualizarVehiculo(patente: string, id_color: number, estado: number): Observable<any> {
+    const url = `${this.apiUrl}/vehiculos/${patente}`;
+    const body = { id_color, estado };
 
+    return this.http.put(url, body);
+  }
+
+  obtenerTiposVehiculo(): Observable<any[]> {
+    const url = `${this.apiUrl}/obtenerTipoVeh`;
+
+    return this.http.get<any[]>(url);
+  }
+  
+  obtenerVehPersona(): Observable<any[]> {
+    const url = `${this.apiUrl}/registroVehiculoPersona`;
+    return this.http.get<any[]>(url);
+  }
+
+  agregarVehiculoResidente(vehiculo: any): Observable<any> {
+    const url = `${this.apiUrl}/agregarVehiculo`;
+    return this.http.post(url, vehiculo);
+  }
+  agregarPersonaVehiculo(rut: string, patente: string, id_est: number): Observable<any> {
+    const url = `${this.apiUrl}/personaVehiculo`;
+    const data = { rut, patente, id_est };
+    return this.http.post(url, data);
+  }
   // Agrega más métodos según tus necesidades (put, delete, etc.)
 }

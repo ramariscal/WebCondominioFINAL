@@ -4,6 +4,8 @@ import { ApiService } from 'src/app/Services/api.service';
 import { Cargo, Comuna, Empleado, Region } from 'src/app/models/empleado.model';
 import { FormBuilder, FormControl, FormGroup, Validators, FormsModule } from '@angular/forms';
 import { AlertController } from '@ionic/angular';
+import { Observable } from 'rxjs';
+
 
 interface patente {
   patente: string;
@@ -16,13 +18,16 @@ interface patente {
 })
 
 export class InformesPage {
+  rut: string = '';
+  patenteValue: string = '';
+  id_est: number = 0;
+  personas: any[]= [];
   rutF: string = '';
   selectedSegment: string;
   empleado: any = {};
   persona: any = {};
   coloresVehiculo: any[] = [];
   colores: any[] = [];
-  mostrarFormularioEditar = false;
   patenteIngresada = false;
   cargos: any[] = [];
   regiones: any[] = [];
@@ -49,6 +54,28 @@ export class InformesPage {
   patente: any = '';
   vehiculo: any;
 
+  tiposVehiculo: any[] = [];
+  idTipoveh: number = 0; // Asignar un valor inicial, por ejemplo, 0
+
+  tipoVehSeleccionado: any = '';
+
+  residenteSeleccionado: any = '';
+
+  mostrarFormularioAgregar: boolean = false; // Agregada la variable mostrarFormularioAgregar
+  mostrarFormularioEditar: boolean = false; // Agregada la variable mostrarFormularioEditar
+
+  intervalId: any;
+
+
+
+  vehiculoForm: any = {
+    patente: '',
+    id_tipoveh: '',
+    id_color: '',
+    estado: ''
+  };
+
+  
 
   validarRutDV(rut: string = ''): boolean {
     if (!/^[0-9]+-[0-9kK]{1}$/.test(rut)) {
@@ -87,12 +114,20 @@ export class InformesPage {
     this.obtenerCargos();
     this.obtenerEdificios();
     this.obtenerDepartamentos();
-    this.obtenerColoresVehiculo();
+    this.obtenerColoresVehiculo();    
     this.obtenerEstadosVehiculo();
+    this.obtenerTiposVehiculo();
+    this.intervalId = setInterval(() => {
+      this.miFuncion();
+    }, 5000);
   }
 
   segmentChanged(event: any) {
     this.selectedSegment = event.detail.value;
+  }
+
+  miFuncion(){
+    this.obtenerColoresVehiculo();
   }
 
   obtenerCargos() {
@@ -164,7 +199,7 @@ export class InformesPage {
     this.persona.edificioPersona = null; // Restablecer la selección del edificio
     this.departamentosFiltrados = []; // Restablecer la lista de departamentos
   }
-  
+
   obtenerDepartamentos() {
     this.gestionService.obtenerDepartamentos().subscribe(
       (data: any) => {
@@ -175,6 +210,110 @@ export class InformesPage {
       }
     );
   }
+  obtenerVehPersona() {
+    this.apiService.obtenerVehPersona().subscribe(
+      (data) => {
+        this.personas = data;
+        console.log('Tipos de persona/veh obtenidos:', this.personas);
+      },
+      (error) => {
+        console.error('Error al obtener los departamentos:', error);
+      }
+    );
+  }
+  guardarDatosVehiculo() {
+    if (this.residenteSeleccionado) {
+      // Accede a los datos del residente seleccionado
+      const rut = this.residenteSeleccionado.rut;
+      const nombre = this.residenteSeleccionado.primer_nombre;
+      const apellido = this.residenteSeleccionado.primer_apellido;
+      // Guarda los datos o realiza las acciones necesarias
+      console.log('Datos del residente seleccionado:', rut, nombre, apellido);
+          // Agrega el console.log para verificar residenteSeleccionado
+    console.log('Residente seleccionado:', this.residenteSeleccionado);
+    } else {
+      console.error('No se ha seleccionado un residente.');
+    }
+  }
+
+
+  agregarVehiculoResidente(): void {
+    const vehiculo = {
+      patente: this.vehiculo.patente,
+      id_tipoveh: this.idTipoveh,
+      id_color: this.colorSeleccionado,
+      estado: 1
+    };
+  
+    this.apiService.agregarVehiculoResidente(vehiculo)
+      .subscribe(
+        response => {
+          console.log('Vehículo agregado exitosamente.');
+  
+          const rutResidente = this.residenteSeleccionado;
+  
+          this.apiService.agregarPersonaVehiculo(rutResidente, vehiculo.patente, 4)
+            .subscribe(
+              response => {
+                console.log('Vehículo agregado al residente exitosamente.');
+                // Manejar la respuesta aquí según tus necesidades
+              },
+              error => {
+                console.error('Error al agregar el vehículo al residente:', error);
+                // Manejar el error aquí según tus necesidades
+              }
+            );
+        },
+        error => {
+          console.error('Error al agregar el vehículo:', error);
+          // Manejar el error aquí según tus necesidades
+        }
+      );
+  }
+  guardar(): void {
+    const vehiculo = {
+      patente: this.patenteValue,
+      id_tipoveh: 2,
+      id_color: 1,
+      estado: 1
+    };
+
+    this.apiService.agregarVehiculoResidente(vehiculo)
+      .subscribe(
+        response => {
+          console.log('Vehículo agregado exitosamente.');
+
+          const rut = this.rut;
+          const patente = this.patenteValue;
+          const id_est = this.id_est;
+
+          this.apiService.agregarPersonaVehiculo(rut, patente, id_est)
+            .subscribe(
+              response => {
+                console.log('Vehículo agregado a la persona exitosamente.');
+                // Manejar la respuesta aquí según tus necesidades
+              },
+              error => {
+                console.error('Error al agregar el vehículo a la persona:', error);
+                // Manejar el error aquí según tus necesidades
+              }
+            );
+        },
+        error => {
+          console.error('Error al agregar el vehículo:', error);
+          // Manejar el error aquí según tus necesidades
+        }
+      );
+  }
+
+  enviartodo(){
+    this.agregarVehiculoResidente();
+    this.guardar();
+  }
+  
+  
+  
+
   filtrarDepartamentos() {
     if (this.persona.edificioPersona) {
       this.departamentosFiltrados = this.departamentos.filter(departamento => departamento.id_edificio === this.persona.edificioPersona);
@@ -398,40 +537,67 @@ if (this.persona.correo && !regexCorreo.test(this.persona.correo)) {
   }
 
   buscar() {
-    const patenteFormatted = this.patente.toUpperCase().replace(/-/g, '').replace(/_/g, '');
+    try {
+      const patenteFormatted = this.patente.toUpperCase().replace(/-/g, '').replace(/_/g, '');
   
-    if (patenteFormatted.trim() === '') {
-      // Manejar caso en que la patente está vacía
-      return;
-    } else {
-      const patente: patente = { patente: patenteFormatted };
-      
-      this.apiService.obtenerDatosVehiculo(patenteFormatted).subscribe(
-        (data: any) => {
-          this.vehiculo = data;
+      if (patenteFormatted.trim() === '') {
+        // Manejar caso en que la patente está vacía
+        return;
+      } else {
+        const patente: patente = { patente: patenteFormatted };
   
-          if (!this.vehiculo) {
-            // Manejar caso en que no se encontró el vehículo
-          } else {
-            // Realizar acciones adicionales si se encontró el vehículo
+        this.apiService.obtenerDatosVehiculo(patenteFormatted).subscribe(
+          (data: any) => {
+            this.vehiculo = data;
   
-            // Cargar los datos de id_color y estado en los combo-box
-            this.colorSeleccionado = this.vehiculo.id_color;
-            this.estadoSeleccionado = parseInt(this.vehiculo.estado);
+            if (!this.vehiculo) {
+              // Manejar caso en que no se encontró el vehículo
+              this.obtenerColoresVehiculo(); // Obtener los colores de vehículo
+              this.obtenerTiposVehiculo(); // Obtener los tipos de vehículo
+              this.obtenerVehPersona(); // Obtener los datos de persona/vehículo
+              this.mostrarFormularioAgregar = true; // Mostrar el formulario de agregar
+            } else {
+              console.log(this.vehiculo.estado);
+              // Realizar acciones adicionales si se encontró el vehículo
+  
+              // Cargar los datos de id_color y estado en los combo-box
+              this.colorSeleccionado = this.vehiculo.id_color;
+              this.estadoSeleccionado = Number(this.vehiculo.estado);
+  
+              // Llamar a obtenerVehPersona() aquí
+              this.obtenerVehPersona();
+  
+              this.mostrarFormularioEditar = true; // Mostrar el formulario de editar
+            }
+          },
+          (error: any) => {
+            // Manejar error de la solicitud HTTP
+            let errorMessage = 'Se produjo un error'; // Asignación de un valor a la variable errorMessage
+            console.error(errorMessage);
+            this.obtenerColoresVehiculo(); // Obtener los colores de vehículo
+            this.obtenerTiposVehiculo(); // Obtener los tipos de vehículo
+            this.obtenerVehPersona(); // Obtener los datos de persona/vehículo
+            this.mostrarFormularioAgregar = true; // Mostrar el formulario de agregar en caso de error
           }
-        },
-        (error: any) => {
-          // Manejar error de la solicitud HTTP
-        }
-      );
+        );
+      }
+    } catch (error) {
+      let errorMessage = 'Se produjo un error'; // Asignación de un valor a la variable errorMessage
+      console.error(errorMessage);
+      this.mostrarFormularioAgregar = true; // Mostrar el formulario de agregar en caso de error
+      // Manejar el error de acuerdo a tus necesidades
+      this.obtenerColoresVehiculo(); // Obtener los colores de vehículo
+      this.obtenerTiposVehiculo(); // Obtener los tipos de vehículo
+      this.obtenerVehPersona(); // Obtener los datos de persona/vehículo
     }
   }
   
 
   obtenerColoresVehiculo() {
-    this.gestionService.obtenerColoresVehiculo().subscribe(
+    this.apiService.obtenerColoresVehiculo().subscribe(
       (colores: any[]) => {
         this.colores = colores;
+        console.log(colores);
       },
       (error) => {
         console.error('Error al obtener colores de vehículo:', error);
@@ -455,31 +621,46 @@ if (this.persona.correo && !regexCorreo.test(this.persona.correo)) {
       }
     );
   }
-
-  actualizarVehiculo() {
-    const idColorVeh = this.vehiculo.colorActual;
-    const estado = this.vehiculo.estado;
-  
-    const datos = {
-      id_colorveh: idColorVeh,
-      estado: estado
-    };
-  
-    this.gestionService.actualizarVehiculo(this.patente, datos).subscribe(
-      (response) => {
-        console.log('Vehículo actualizado:', response);
-        // Realizar acciones adicionales si es necesario
-        console.log(datos);
-      },
-      (error) => {
-        console.error('Error al actualizar el vehículo:', error);
-      }
-    );
-  }
   
   obtenerVehiculo(patente: string) {
     return this.apiService.obtenerDatosVehiculo(patente);
   }
+  actualizarVehiculo() {
+    const patente = this.vehiculo.patente; // Reemplaza con la patente deseada
+    const id_color = this.colorSeleccionado; // Reemplaza con el nuevo id_color
+    const estado = this.estadoSeleccionado; // Reemplaza con el nuevo estado
+
+    this.apiService
+      .actualizarVehiculo(patente, id_color, estado)
+      .subscribe(
+        () => {
+          console.log('Registro actualizado exitosamente.');
+          // Realizar acciones adicionales después de la actualización
+        },
+        (error) => {
+          console.error('Error al actualizar el registro:', error);
+          // Manejar el error adecuadamente
+        }
+      );
+  }
+  obtenerTiposVehiculo() {
+    this.apiService.obtenerTiposVehiculo().subscribe(
+      (data) => {
+        this.tiposVehiculo = data;
+        console.log('Tipos de vehículo obtenidos:', this.tiposVehiculo);
+      },
+      (error) => {
+        console.log('Error al obtener tipos de vehículo:', error);
+      }
+    );
+  }
+
+  seleccionarTipoVehiculo(event: any) {
+    this.tipoVehSeleccionado = event.detail.value;
+    console.log('Opción seleccionada:', this.tipoVehSeleccionado);
+    // Aquí puedes realizar acciones adicionales con la opción seleccionada
+  }
+
   agregarVehiculo(){
 
   }

@@ -83,10 +83,6 @@ export class GestionService {
   obtenerVehiculo(patente: string) {
     return this.apiService.obtenerDatosVehiculo(patente);
   }
-  // Método para actualizar un vehículo
-  actualizarVehiculo(patente: string, datos: any): Observable<any> {
-    return this.apiService.actualizarVehiculo(patente, datos);
-  }
   
   obtenerColoresVehiculo(): Observable<any[]> {
     const url = 'obtenerColorVeh';
@@ -97,5 +93,6 @@ export class GestionService {
     const url = 'obtenerEstadosVeh';
     return this.apiService.get(url);
   }
+  
   
 }

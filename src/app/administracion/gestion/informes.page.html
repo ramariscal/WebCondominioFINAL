@@ -252,34 +252,8 @@
       </ion-card-content>
     </ion-card>
 
-    <!-- <ion-content>
-      <ion-item>
-        <ion-label position="floating">Patente</ion-label>
-        <ion-input [(ngModel)]="patente" type="text"></ion-input>
-      </ion-item>
-
-      <ion-button expand="full" (click)="buscar()">Buscar</ion-button>
-
-      <ion-card *ngIf="vehiculo">
-        <ion-card-header> Información del Vehículo </ion-card-header>
-        <ion-card-content>
-          <ion-list>
-            <ion-item>
-              <ion-label>Patente:</ion-label>
-              <ion-text>{{ vehiculo.patente }}</ion-text>
-            </ion-item>
-            <ion-item>
-              <ion-label>Tipo de Vehículo:</ion-label>
-              <ion-text>{{ vehiculo.tipo_veh }}</ion-text>
-            </ion-item>
-             Agrega aquí más elementos según los datos del vehículo que quieras mostrar 
-          </ion-list>
-        </ion-card-content>
-      </ion-card>
-    </ion-content> -->
-
     <!-- Formulario para editar vehículos  -->
-    <ion-card>
+    <ion-card *ngIf="mostrarFormularioEditar">
       <ion-card-content>
         <ion-item>
           <ion-label>PATENTE:</ion-label>
@@ -326,25 +300,34 @@
             readonly
           ></ion-input>
         </ion-item>
-        <ion-button expand="full" (click)="agregarVehiculo()">
+        <ion-button expand="full" (click)="actualizarVehiculo()">
           Actualizar
         </ion-button>
       </ion-card-content>
     </ion-card>
 
     <!-- Formulario para agregar vehículos -->
-    <ion-card>
+    <ion-card *ngIf="mostrarFormularioAgregar">
       <ion-card-content>
         <ion-item>
           <ion-label>PATENTE:</ion-label>
-          <ion-input readonly>{{ vehiculo.patente }}</ion-input>
+          <ion-input>{{ vehiculo.patente }}</ion-input>
         </ion-item>
         <ion-item>
           <ion-label>TIPO VEHICULO:</ion-label>
-          <ion-select [(ngModel)]="vehiculo.tipo_veh">
-            <ion-select-option value="Sedán">Sedán</ion-select-option>
+          <ion-select
+            [(ngModel)]="idTipoveh"
+            (ionChange)="seleccionarTipoVehiculo($event)"
+          >
+            <ion-select-option
+              *ngFor="let tipoVehiculo of tiposVehiculo"
+              [value]="tipoVehiculo.id_tipoveh"
+            >
+              {{ tipoVehiculo.tipo_veh }}
+            </ion-select-option>
           </ion-select>
         </ion-item>
+
         <ion-item>
           <ion-label>COLOR:</ion-label>
           <ion-select
@@ -360,97 +343,19 @@
           </ion-select>
         </ion-item>
         <ion-item>
-          <ion-label>CONDOMINIO:</ion-label>
-          <ion-select
-            [(ngModel)]="vehiculo.id_conjunto"
-            required
-            (ionChange)="filtrarEdificios()"
-          >
+          <ion-label>RESIDENTE</ion-label>
+          <ion-select [(ngModel)]="residenteSeleccionado">
             <ion-select-option
-              *ngFor="let condominio of condominios"
-              [value]="condominio.id_conjunto"
+              *ngFor="let personas of personas"
+              [value]="personas.rut"
             >
-              {{ condominio.nombre_conjunto }}
+              {{ personas.primer_nombre + ' ' + personas.primer_apellido + ' ' +
+              'D: ' + personas.id_departamento + ' ' + 'T: ' +
+              personas.id_edificio + ' ' + personas.nombre_conjunto}}
             </ion-select-option>
           </ion-select>
         </ion-item>
-
-        <ion-item>
-          <ion-label>TORRE:</ion-label>
-          <ion-select
-            [(ngModel)]="vehiculo.id_edificio"
-            required
-            (ionChange)="filtrarDepartamentos()"
-          >
-            <ion-select-option
-              *ngFor="let edificio of edificiosFiltrados"
-              [value]="edificio.id_edificio"
-            >
-              {{ edificio.id_edificio }}
-            </ion-select-option>
-          </ion-select>
-        </ion-item>
-
-        <ion-item>
-          <ion-label>DEPTO:</ion-label>
-          <ion-select [(ngModel)]="vehiculo.id_departamento" required>
-            <ion-select-option
-              *ngFor="let departamento of departamentosFiltrados"
-              [value]="departamento.id_departamento"
-            >
-              {{ departamento.id_departamento }}
-            </ion-select-option>
-          </ion-select>
-        </ion-item>
-
-        <ion-item>
-          <ion-label>ESTACIONAMIENTO:</ion-label>
-          <ion-select [(ngModel)]="vehiculo.estacionamiento">
-            <ion-select-option value="101">101</ion-select-option>
-          </ion-select>
-        </ion-item>
-        <ion-button expand="full" (click)="agregarVehiculo()"
-          >Agregar</ion-button
-        >
-      </ion-card-content>
-    </ion-card>
-
-    <!--  Sección para mostrar información del vehículo -->
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title>Información del vehículo</ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <ion-list>
-          <ion-item>
-            <ion-label>PATENTE:</ion-label>
-            <ion-input readonly [value]="vehiculo.patente"></ion-input>
-          </ion-item>
-          <ion-item>
-            <ion-label>TIPO VEHICULO:</ion-label>
-            <ion-input readonly [value]="vehiculo.tipoVehiculo"></ion-input>
-          </ion-item>
-          <ion-item>
-            <ion-label>COLOR:</ion-label>
-            <ion-input readonly [value]="vehiculo.color"></ion-input>
-          </ion-item>
-          <ion-item>
-            <ion-label>CONDOMINIO:</ion-label>
-            <ion-input readonly [value]="vehiculo.condominio"></ion-input>
-          </ion-item>
-          <ion-item>
-            <ion-label>TORRE:</ion-label>
-            <ion-input readonly [value]="vehiculo.torre"></ion-input>
-          </ion-item>
-          <ion-item>
-            <ion-label>DEPTO:</ion-label>
-            <ion-input readonly [value]="vehiculo.depto"></ion-input>
-          </ion-item>
-          <ion-item>
-            <ion-label>ESTACIONAMIENTO:</ion-label>
-            <ion-input readonly [value]="vehiculo.estacionamiento"></ion-input>
-          </ion-item>
-        </ion-list>
+        <ion-button expand="full" (click)="enviartodo()">Agregar</ion-button>
       </ion-card-content>
     </ion-card>
   </ng-container>
